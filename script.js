@@ -28,7 +28,6 @@ function logout() {
   location.reload();
 }
 
-// إصلاح زرار العين (Toggle Password)
 document.addEventListener('DOMContentLoaded', () => {
   const togglePassword = document.getElementById("togglePassword");
   const passwordInput = document.getElementById("password");
@@ -43,27 +42,29 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// --- دالة تنسيق الوقت الاحترافية (إجبار التنسيق الرقمي الثابت) ---
+// --- دالة تنسيق الوقت بنظام 12 ساعة (AM/PM) ---
 function getFormattedDate() {
     const now = new Date();
+    let hours = now.getHours();
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    
+    hours = hours % 12;
+    hours = hours ? hours : 12; // الساعة 0 تصبح 12
+    const strHours = String(hours).padStart(2, '0');
+    
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
     
-    return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
+    return `${year}/${month}/${day} ${strHours}:${minutes}:${seconds} ${ampm}`;
 }
 
-// --- 2. Data Initialization ---
-let products = JSON.parse(localStorage.getItem("sm_products")) || [
-  { rfid: "TAG_001", name: "Product A", category: "General", status: "on_shelf" }
-];
+// --- 2. Data Initialization (جداول فارغة تماماً) ---
+let products = JSON.parse(localStorage.getItem("sm_products")) || [];
 
-let inventoryLogs = JSON.parse(localStorage.getItem("sm_logs")) || [
-  { log_id: 1, rfid_tag: "TAG_001", arrival_timestamp: getFormattedDate() }
-];
+let inventoryLogs = JSON.parse(localStorage.getItem("sm_logs")) || [];
 
 let editingRfid = null;
 
@@ -106,7 +107,6 @@ function renderTable() {
     const row = document.createElement("tr");
 
     if (isEditing) {
-      // تم فتح تعديل الـ RFID هنا عبر إضافة Input له
       row.innerHTML = `
         <td><input type="text" id="editName" value="${p.name}"></td>
         <td><input type="text" id="editRfid" value="${p.rfid}"></td>
@@ -140,7 +140,6 @@ function renderTable() {
   logsBody.innerHTML = "";
   inventoryLogs.forEach(log => {
     const row = document.createElement("tr");
-    // إجبار التنسيق LTR لضمان عدم انعكاس الأرقام في المتصفحات العربية
     row.innerHTML = `
       <td>${log.log_id}</td>
       <td>${log.rfid_tag}</td>
@@ -169,21 +168,16 @@ function saveEdit(oldRfid) {
   const productIndex = products.findIndex(p => p.rfid === oldRfid);
   
   if (productIndex !== -1) {
-    // تحديث البيانات
+    if (newRfid !== oldRfid && products.find(p => p.rfid === newRfid)) {
+        alert("This RFID already exists!");
+        return;
+    }
     products[productIndex].name = document.getElementById("editName").value;
     products[productIndex].category = document.getElementById("editCategory").value;
     products[productIndex].status = document.getElementById("editStatus").value;
     
-    // إذا تغير الـ RFID، نقوم بتحديثه في جدول المنتجات وفي السجلات المرتبطة به
     if (newRfid !== oldRfid) {
-        // تأكد أن الـ RFID الجديد غير موجود مسبقاً
-        if (products.find(p => p.rfid === newRfid)) {
-            alert("This RFID already exists!");
-            return;
-        }
         products[productIndex].rfid = newRfid;
-        
-        // تحديث الـ Logs المرتبطة
         inventoryLogs.forEach(log => {
             if (log.rfid_tag === oldRfid) log.rfid_tag = newRfid;
         });
@@ -229,7 +223,6 @@ function filterTable() {
   });
 }
 
-// --- 6. Initialization ---
 function initApp() {
   const isLoggedIn = localStorage.getItem("sm_isLoggedIn");
   const overlay = document.getElementById("loginOverlay");
