@@ -131,6 +131,7 @@ body {
   box-sizing: border-box;
 }
 
+/* إصلاح زرار العين */
 .toggle-password {
   position: absolute;
   right: 15px;
@@ -139,6 +140,7 @@ body {
   cursor: pointer;
   color: var(--text-color);
   opacity: 0.6;
+  z-index: 10;
 }
 
 .login-btn {
@@ -203,7 +205,7 @@ header {
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 1.5fr 1fr;
+  grid-template-columns: 1fr; /* تم التعديل ليكون عمود واحد */
   gap: 20px;
   align-items: start;
   width: 100%;
@@ -230,18 +232,6 @@ header {
   gap: 10px;
 }
 
-#dynamicInputs {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 100%;
-}
-
-.btn-group {
-  display: flex;
-  gap: 10px;
-}
-
 input,
 select {
   background: var(--bg-color);
@@ -265,6 +255,11 @@ select {
   align-items: center;
   justify-content: center;
   gap: 8px;
+  transition: transform 0.1s;
+}
+
+.btn:active {
+    transform: scale(0.98);
 }
 
 .btn-success {
@@ -274,16 +269,10 @@ select {
 
 .btn-primary {
   background: var(--primary-color);
-  flex: 1;
-}
-
-.btn-danger {
-  background: var(--danger-color);
-  flex: 1;
 }
 
 .search-section {
-  margin-bottom: 25px;
+  margin: 25px 0;
   width: 100%;
 }
 
@@ -305,7 +294,7 @@ select {
     padding-left: 45px;
 }
 
-/* --- عناوين الجداول المضافة حديثاً --- */
+/* --- Tables Layout --- */
 .table-title {
     width: 100%;
     margin: 20px 0 10px 0;
@@ -322,7 +311,7 @@ select {
   border: 1px solid var(--border-color);
   overflow-x: auto;
   width: 100%;
-  margin-bottom: 30px; /* زيادة الهامش بين الجداول */
+  margin-bottom: 30px;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -332,8 +321,7 @@ table {
   min-width: 600px;
 }
 
-th,
-td {
+th, td {
   padding: 15px;
   text-align: center;
   border-bottom: 1px solid var(--border-color);
@@ -345,21 +333,25 @@ th {
   color: var(--primary-color);
 }
 
-.status-label {
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: bold;
+/* Actions Buttons */
+.actions-cell {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
 }
 
-.on_shelf {
-  background: #d1fae5;
-  color: #065f46;
+.row-edit-btn {
+    color: var(--primary-color);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: 0.2s;
 }
 
-.moving {
-  background: #fef3c7;
-  color: #92400e;
+.row-edit-btn:hover {
+    color: var(--accent-color);
+    transform: scale(1.2);
 }
 
 .row-delete-btn {
@@ -368,36 +360,26 @@ th {
   border: none;
   cursor: pointer;
   font-size: 1.1rem;
+  transition: 0.2s;
 }
 
-.is-logged-in #loginOverlay {
-    display: none !important;
+.row-delete-btn:hover {
+    transform: scale(1.2);
 }
 
-.is-logged-in #mainContainer {
-    display: flex !important;
-    flex-direction: column;
-    align-items: center;
+.status-label {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
 }
 
-/* --- Responsive Media Queries --- */
-@media (max-width: 850px) {
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  body {
-    padding: 10px;
-  }
-}
+.on_shelf { background: #d1fae5; color: #065f46; }
+.moving { background: #fef3c7; color: #92400e; }
+
+.is-logged-in #loginOverlay { display: none !important; }
+.is-logged-in #mainContainer { display: flex !important; flex-direction: column; align-items: center; }
 
 @media (max-width: 480px) {
-  .header-content {
-    justify-content: center;
-    text-align: center;
-  }
-  
-  .btn-group {
-    flex-direction: column;
-  }
-}
+  th, td { padding: 10px 5px; font-size: 0.8rem; }
+               }
