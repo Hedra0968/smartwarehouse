@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// --- دالة تنسيق الوقت الاحترافية (تعديل جديد) ---
+// --- دالة تنسيق الوقت الاحترافية (إجبار التنسيق الرقمي) ---
 function getFormattedDate() {
     const now = new Date();
     const year = now.getFullYear();
@@ -53,7 +53,6 @@ function getFormattedDate() {
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
     
-    // التنسيق: 2026/04/23 23:15:05
     return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
 }
 
@@ -140,7 +139,8 @@ function renderTable() {
   logsBody.innerHTML = "";
   inventoryLogs.forEach(log => {
     const row = document.createElement("tr");
-    row.innerHTML = `<td>${log.log_id}</td><td>${log.rfid_tag}</td><td>${log.arrival_timestamp}</td>`;
+    // التعديل هنا: إضافة dir="ltr" لإجبار التنسيق من اليسار لليمين وتجنب انعكاس العربي
+    row.innerHTML = `<td>${log.log_id}</td><td>${log.rfid_tag}</td><td dir="ltr" style="text-align: center;">${log.arrival_timestamp}</td>`;
     logsBody.appendChild(row);
   });
 
@@ -184,7 +184,7 @@ function addProduct() {
   inventoryLogs.push({
     log_id: inventoryLogs.length + 1,
     rfid_tag: rfid,
-    arrival_timestamp: getFormattedDate() // تم التغيير هنا لاستخدام التاريخ المنسق
+    arrival_timestamp: getFormattedDate()
   });
 
   renderTable();
