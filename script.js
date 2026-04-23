@@ -1,4 +1,4 @@
-// --- 1. Authentication Logic (Static Credentials) ---
+// --- 1. Authentication Logic ---
 const VALID_USER = "admin";
 const VALID_PASS = "admin";
 
@@ -6,18 +6,18 @@ function checkLogin() {
   const user = document.getElementById("username").value;
   const pass = document.getElementById("password").value;
   const errorMsg = document.getElementById("loginError");
-  const loginBtn = document.querySelector(".btn-primary.login-btn");
+  const loginBtn = document.querySelector(".login-btn");
 
   if (user === VALID_USER && pass === VALID_PASS) {
     loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
     loginBtn.style.pointerEvents = "none";
 
-    setTimeout(function () {
+    setTimeout(function() {
       localStorage.setItem("sm_isLoggedIn", "true");
       initApp();
       loginBtn.innerHTML = "Login";
       loginBtn.style.pointerEvents = "auto";
-    }, 800);
+    }, 800); 
   } else {
     errorMsg.style.display = "block";
   }
@@ -28,119 +28,108 @@ function logout() {
   location.reload();
 }
 
-// --- 2. Data Initialization (Based on Project Schema) ---
-// مصفوفة المنتجات بناءً على جدول products في الملف
+// إصلاح زرار العين (Toggle Password)
+document.addEventListener('DOMContentLoaded', () => {
+  const togglePassword = document.getElementById("togglePassword");
+  const passwordInput = document.getElementById("password");
+
+  if (togglePassword && passwordInput) {
+    togglePassword.addEventListener("click", function () {
+      const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+      passwordInput.setAttribute("type", type);
+      this.classList.toggle("fa-eye");
+      this.classList.toggle("fa-eye-slash");
+    });
+  }
+});
+
+// --- 2. Data Initialization ---
 let products = JSON.parse(localStorage.getItem("sm_products")) || [
-  {
-    rfid: "TAG_001",
-    name: "Product A",
-    category: "General",
-    status: "on_shelf",
-    customData: {},
-  },
+  { rfid: "TAG_001", name: "Product A", category: "General", status: "on_shelf" }
 ];
 
-// مصفوفة السجلات بناءً على جدول inventory_logs في الملف
 let inventoryLogs = JSON.parse(localStorage.getItem("sm_logs")) || [
-  {
-    log_id: 1,
-    rfid_tag: "TAG_001",
-    arrival_timestamp: new Date().toLocaleString(),
-  },
+  { log_id: 1, rfid_tag: "TAG_001", arrival_timestamp: new Date().toLocaleString() }
 ];
 
-let extraCols = JSON.parse(localStorage.getItem("sm_cols")) || [];
+let editingRfid = null; // لمتابعة الصف اللي بيتم تعديله حالياً
 
 // --- 3. Theme Management ---
 function setupTheme() {
   const mode = localStorage.getItem("sm_theme") || "light";
-  if (mode === "dark") {
-    document.documentElement.classList.add("dark-mode");
-  } else {
-    document.documentElement.classList.remove("dark-mode");
-  }
+  document.documentElement.classList.toggle("dark-mode", mode === "dark");
   updateThemeIcons(mode);
 }
 
 function updateThemeIcons(mode) {
-  const icon =
-    mode === "dark"
-      ? '<i class="fas fa-sun"></i>'
-      : '<i class="fas fa-moon"></i>';
-  if (document.getElementById("themeToggle"))
-    document.getElementById("themeToggle").innerHTML = icon;
-  if (document.getElementById("loginThemeToggle"))
-    document.getElementById("loginThemeToggle").innerHTML = icon;
+  const icon = mode === "dark" ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+  ["themeToggle", "loginThemeToggle"].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.innerHTML = icon;
+  });
 }
 
-const themeHandler = function () {
+function toggleTheme() {
   document.documentElement.classList.toggle("dark-mode");
-  const mode = document.documentElement.classList.contains("dark-mode")
-    ? "dark"
-    : "light";
+  const mode = document.documentElement.classList.contains("dark-mode") ? "dark" : "light";
   localStorage.setItem("sm_theme", mode);
   updateThemeIcons(mode);
-};
+}
 
-if (document.getElementById("themeToggle"))
-  document
-    .getElementById("themeToggle")
-    .addEventListener("click", themeHandler);
-if (document.getElementById("loginThemeToggle"))
-  document
-    .getElementById("loginThemeToggle")
-    .addEventListener("click", themeHandler);
+document.getElementById("themeToggle")?.addEventListener("click", toggleTheme);
+document.getElementById("loginThemeToggle")?.addEventListener("click", toggleTheme);
 
-// --- 4. Core Table Functions (Multi-Table Support) ---
+// --- 4. Core Table Functions ---
 function renderTable() {
   const tbody = document.getElementById("tableBody");
   const logsBody = document.getElementById("logsBody");
   const thead = document.getElementById("tableHead");
-  const dynamicInputs = document.getElementById("dynamicInputs");
 
-  // رسم الهيدر الخاص بالمنتجات (أضفنا Category)
-  let hContent = `<tr><th>Name</th><th>RFID (PK)</th><th>Category</th><th>Status</th>`;
-  extraCols.forEach((c) => (hContent += `<th>${c}</th>`));
-  hContent += `<th>Actions</th></tr>`;
-  thead.innerHTML = hContent;
-
-  // توليد الحقول الديناميكية
-  if (dynamicInputs) {
-    dynamicInputs.innerHTML = "";
-    extraCols.forEach((c) => {
-      const input = document.createElement("input");
-      input.id = `new_col_${c}`;
-      input.placeholder = `Enter ${c}...`;
-      dynamicInputs.appendChild(input);
-    });
-  }
+  // الهيدر الثابت
+  thead.innerHTML = `<tr><th>Name</th><th>RFID (PK)</th><th>Category</th><th>Status</th><th>Actions</th></tr>`;
 
   // رسم جدول المنتجات
   tbody.innerHTML = "";
-  products.forEach((p, idx) => {
+  products.forEach((p) => {
+    const isEditing = editingRfid === p.rfid;
     const row = document.createElement("tr");
-    let rContent = `
-      <td contenteditable="true" onblur="editCell(${idx}, 'name', this.innerText)">${p.name}</td>
-      <td contenteditable="true" onblur="editCell(${idx}, 'rfid', this.innerText)">${p.rfid}</td>
-      <td contenteditable="true" onblur="editCell(${idx}, 'category', this.innerText)">${p.category}</td>
-      <td>
-        <span class="status-label ${p.status}" onclick="toggleStatus(${idx})" style="cursor:pointer">
-          ${p.status === "on_shelf" ? "On Shelf" : "Moving"}
-        </span>
-      </td>
-    `;
-    extraCols.forEach(
-      (c) =>
-        (rContent += `<td contenteditable="true" onblur="editExtra(${idx}, '${c}', this.innerText)">${p.customData[c] || "-"}</td>`),
-    );
-    rContent += `<td><button class="row-delete-btn" onclick="deleteProduct('${p.rfid}')"><i class="fas fa-trash-alt"></i></button></td>`;
-    row.innerHTML = rContent;
+
+    if (isEditing) {
+      // وضع التعديل (Edit Mode)
+      row.innerHTML = `
+        <td><input type="text" id="editName" value="${p.name}"></td>
+        <td><strong>${p.rfid}</strong></td>
+        <td><input type="text" id="editCategory" value="${p.category}"></td>
+        <td>
+          <select id="editStatus">
+            <option value="on_shelf" ${p.status === 'on_shelf' ? 'selected' : ''}>On Shelf</option>
+            <option value="moving" ${p.status === 'moving' ? 'selected' : ''}>Moving</option>
+          </select>
+        </td>
+        <td class="actions-cell">
+          <button class="row-edit-btn" onclick="saveEdit('${p.rfid}')" title="Save"><i class="fas fa-check"></i></button>
+          <button class="row-delete-btn" onclick="cancelEdit()" title="Cancel"><i class="fas fa-times"></i></button>
+        </td>
+      `;
+    } else {
+      // وضع العرض العادي
+      row.innerHTML = `
+        <td>${p.name}</td>
+        <td>${p.rfid}</td>
+        <td>${p.category}</td>
+        <td><span class="status-label ${p.status}">${p.status.replace('_', ' ')}</span></td>
+        <td class="actions-cell">
+          <button class="row-edit-btn" onclick="startEdit('${p.rfid}')" title="Edit"><i class="fas fa-edit"></i></button>
+          <button class="row-delete-btn" onclick="deleteProduct('${p.rfid}')" title="Delete"><i class="fas fa-trash-alt"></i></button>
+        </td>
+      `;
+    }
     tbody.appendChild(row);
   });
 
-  // رسم جدول السجلات (Inventory Logs) المذكور في صفحة 2
+  // رسم جدول السجلات
   logsBody.innerHTML = "";
-  inventoryLogs.forEach((log) => {
+  inventoryLogs.forEach(log => {
     const row = document.createElement("tr");
     row.innerHTML = `<td>${log.log_id}</td><td>${log.rfid_tag}</td><td>${log.arrival_timestamp}</td>`;
     logsBody.appendChild(row);
@@ -148,90 +137,62 @@ function renderTable() {
 
   localStorage.setItem("sm_products", JSON.stringify(products));
   localStorage.setItem("sm_logs", JSON.stringify(inventoryLogs));
-  localStorage.setItem("sm_cols", JSON.stringify(extraCols));
 }
 
 // --- 5. Action Functions ---
+function startEdit(rfid) {
+  editingRfid = rfid;
+  renderTable();
+}
+
+function cancelEdit() {
+  editingRfid = null;
+  renderTable();
+}
+
+function saveEdit(rfid) {
+  const product = products.find(p => p.rfid === rfid);
+  if (product) {
+    product.name = document.getElementById("editName").value;
+    product.category = document.getElementById("editCategory").value;
+    product.status = document.getElementById("editStatus").value;
+  }
+  editingRfid = null;
+  renderTable();
+}
+
 function addProduct() {
   const name = document.getElementById("newName").value;
   const rfid = document.getElementById("newRfid").value;
   const category = document.getElementById("newCategory").value;
   const status = document.getElementById("newStatus").value;
 
-  if (!name || !rfid) return alert("RFID and Name are mandatory!");
+  if (!name || !rfid) return alert("Please fill Name and RFID");
+  if (products.find(p => p.rfid === rfid)) return alert("RFID already exists!");
 
-  // منع تكرار الـ RFID لأنه Primary Key
-  if (products.find((p) => p.rfid === rfid))
-    return alert("RFID Tag must be unique!");
-
-  const customData = {};
-  extraCols.forEach(
-    (c) =>
-      (customData[c] = document.getElementById(`new_col_${c}`).value || "-"),
-  );
-
-  // إضافة للمنتجات
-  products.push({
-    rfid,
-    name,
-    category: category || "Uncategorized",
-    status,
-    customData,
-  });
-
-  // إضافة تلقائية للسجلات (Log Entry)
+  products.push({ rfid, name, category: category || "General", status });
+  
   inventoryLogs.push({
     log_id: inventoryLogs.length + 1,
     rfid_tag: rfid,
-    arrival_timestamp: new Date().toLocaleString(),
+    arrival_timestamp: new Date().toLocaleString()
   });
 
   renderTable();
-  ["newName", "newRfid", "newCategory"].forEach(
-    (id) => (document.getElementById(id).value = ""),
-  );
-}
-
-function toggleStatus(idx) {
-  products[idx].status =
-    products[idx].status === "on_shelf" ? "moving" : "on_shelf";
-  renderTable();
+  ["newName", "newRfid", "newCategory"].forEach(id => document.getElementById(id).value = "");
 }
 
 function deleteProduct(rfid) {
-  if (confirm("Delete product and its history?")) {
-    products = products.filter((p) => p.rfid !== rfid);
-    inventoryLogs = inventoryLogs.filter((l) => l.rfid_tag !== rfid);
+  if (confirm("Delete this product and its history?")) {
+    products = products.filter(p => p.rfid !== rfid);
+    inventoryLogs = inventoryLogs.filter(l => l.rfid_tag !== rfid);
     renderTable();
   }
 }
 
-function handleColumn(action) {
-  const colName = document.getElementById("colInput").value.trim();
-  if (!colName) return;
-  if (action === "add") {
-    if (!extraCols.includes(colName)) extraCols.push(colName);
-  } else {
-    extraCols = extraCols.filter((c) => c !== colName);
-    products.forEach((p) => delete p.customData[colName]);
-  }
-  renderTable();
-  document.getElementById("colInput").value = "";
-}
-
-function editCell(idx, field, val) {
-  products[idx][field] = val;
-  localStorage.setItem("sm_products", JSON.stringify(products));
-}
-
-function editExtra(idx, col, val) {
-  products[idx].customData[col] = val;
-  localStorage.setItem("sm_products", JSON.stringify(products));
-}
-
 function filterTable() {
   const q = document.getElementById("searchInput").value.toLowerCase();
-  document.querySelectorAll("tbody tr").forEach((row) => {
+  document.querySelectorAll("#tableBody tr").forEach(row => {
     row.style.display = row.innerText.toLowerCase().includes(q) ? "" : "none";
   });
 }
@@ -250,24 +211,11 @@ function initApp() {
   }
 }
 
-window.onload = function () {
+window.onload = function() {
   setupTheme();
   initApp();
   setTimeout(() => {
-    const loader = document.getElementById("app-loader");
-    if (loader) {
-      loader.style.opacity = "0";
-      setTimeout(() => loader.remove(), 200);
-    }
+    const loader = document.getElementById('app-loader');
+    if(loader) { loader.style.opacity = '0'; setTimeout(() => loader.remove(), 200); }
   }, 50);
 };
-
-// Password Toggle
-document
-  .getElementById("togglePassword")
-  ?.addEventListener("click", function () {
-    const type =
-      passwordInput.getAttribute("type") === "password" ? "text" : "password";
-    passwordInput.setAttribute("type", type);
-    this.classList.toggle("fa-eye-slash");
-  });
