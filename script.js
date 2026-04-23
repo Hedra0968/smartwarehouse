@@ -43,16 +43,30 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// --- دالة تنسيق الوقت الاحترافية (تعديل جديد) ---
+function getFormattedDate() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    
+    // التنسيق: 2026/04/23 23:15:05
+    return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
+}
+
 // --- 2. Data Initialization ---
 let products = JSON.parse(localStorage.getItem("sm_products")) || [
   { rfid: "TAG_001", name: "Product A", category: "General", status: "on_shelf" }
 ];
 
 let inventoryLogs = JSON.parse(localStorage.getItem("sm_logs")) || [
-  { log_id: 1, rfid_tag: "TAG_001", arrival_timestamp: new Date().toLocaleString() }
+  { log_id: 1, rfid_tag: "TAG_001", arrival_timestamp: getFormattedDate() }
 ];
 
-let editingRfid = null; // لمتابعة الصف اللي بيتم تعديله حالياً
+let editingRfid = null;
 
 // --- 3. Theme Management ---
 function setupTheme() {
@@ -85,17 +99,14 @@ function renderTable() {
   const logsBody = document.getElementById("logsBody");
   const thead = document.getElementById("tableHead");
 
-  // الهيدر الثابت
   thead.innerHTML = `<tr><th>Name</th><th>RFID (PK)</th><th>Category</th><th>Status</th><th>Actions</th></tr>`;
 
-  // رسم جدول المنتجات
   tbody.innerHTML = "";
   products.forEach((p) => {
     const isEditing = editingRfid === p.rfid;
     const row = document.createElement("tr");
 
     if (isEditing) {
-      // وضع التعديل (Edit Mode)
       row.innerHTML = `
         <td><input type="text" id="editName" value="${p.name}"></td>
         <td><strong>${p.rfid}</strong></td>
@@ -112,7 +123,6 @@ function renderTable() {
         </td>
       `;
     } else {
-      // وضع العرض العادي
       row.innerHTML = `
         <td>${p.name}</td>
         <td>${p.rfid}</td>
@@ -127,7 +137,6 @@ function renderTable() {
     tbody.appendChild(row);
   });
 
-  // رسم جدول السجلات
   logsBody.innerHTML = "";
   inventoryLogs.forEach(log => {
     const row = document.createElement("tr");
@@ -175,7 +184,7 @@ function addProduct() {
   inventoryLogs.push({
     log_id: inventoryLogs.length + 1,
     rfid_tag: rfid,
-    arrival_timestamp: new Date().toLocaleString()
+    arrival_timestamp: getFormattedDate() // تم التغيير هنا لاستخدام التاريخ المنسق
   });
 
   renderTable();
