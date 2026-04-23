@@ -1,0 +1,403 @@
+/* --- Global Fix for Horizontal Scroll --- */
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 100%;
+    max-width: 100%; 
+    margin: 0 auto;
+    padding: 10px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.content-limiter {
+    width: 100%;
+    max-width: 1100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+:root {
+  --bg-color: #f4f7f6;
+  --card-bg: #ffffff;
+  --text-color: #2d3436;
+  --border-color: #dfe6e9;
+  --primary-color: #0984e3;
+  --success-color: #00b894;
+  --danger-color: #d63031;
+  --accent-color: #6c5ce7;
+}
+
+.dark-mode, :root.dark-mode body {
+  --bg-color: #1a1a2e;
+  --card-bg: #16213e;
+  --text-color: #e9ecef;
+  --border-color: #4a4e69;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: "Segoe UI", sans-serif;
+  margin: 0;
+  padding: 20px;
+  direction: ltr; 
+  transition: 0.3s ease;
+}
+
+/* --- Login Panel Styles --- */
+.login-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.login-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.login-card {
+  background: var(--card-bg);
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  width: 90%; 
+  max-width: 400px; 
+  text-align: center;
+  position: relative;
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.theme-toggle-login {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+}
+
+.theme-switch.small {
+  width: 35px;
+  height: 35px;
+  font-size: 1rem;
+}
+
+.login-card h2 {
+  margin-bottom: 10px;
+  color: var(--primary-color);
+  font-size: 2rem;
+}
+
+.input-wrapper {
+  position: relative;
+  margin-bottom: 5px;
+}
+
+.input-wrapper i:not(.toggle-password) {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--primary-color);
+}
+
+.input-wrapper input {
+  width: 100%;
+  padding: 12px 40px;
+  box-sizing: border-box;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: var(--text-color);
+  opacity: 0.6;
+}
+
+.login-btn {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.error-msg {
+  color: var(--danger-color);
+  margin-top: 15px;
+  display: none;
+  font-weight: bold;
+}
+
+/* --- Dashboard Container --- */
+#mainContainer {
+    display: none; 
+}
+
+#mainContainer.show {
+  opacity: 1;
+}
+
+header {
+  margin-bottom: 30px;
+  width: 100%;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.header-btns {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-logout {
+  background: var(--danger-color);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.theme-switch {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 20px;
+  align-items: start;
+  width: 100%;
+}
+
+.card {
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color);
+  width: 100%;
+}
+
+.card h3 {
+  margin: 0 0 15px 0;
+  font-size: 1rem;
+  color: var(--accent-color);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#dynamicInputs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.btn-group {
+  display: flex;
+  gap: 10px;
+}
+
+input,
+select {
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  width: 100%;
+}
+
+.btn {
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: white;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-success {
+  background: var(--success-color);
+  width: 100%;
+}
+
+.btn-primary {
+  background: var(--primary-color);
+  flex: 1;
+}
+
+.btn-danger {
+  background: var(--danger-color);
+  flex: 1;
+}
+
+.search-section {
+  margin-bottom: 25px;
+  width: 100%;
+}
+
+.search-box {
+  position: relative;
+  width: 100%;
+}
+
+.search-box i {
+  position: absolute;
+  left: 15px; 
+  top: 50%;
+  transform: translateY(-50%);
+  color: #b2bec3;
+}
+
+.search-box input {
+    width: 100%; 
+    padding-left: 45px;
+}
+
+/* --- عناوين الجداول المضافة حديثاً --- */
+.table-title {
+    width: 100%;
+    margin: 20px 0 10px 0;
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.table-wrapper {
+  background: var(--card-bg);
+  border-radius: 15px;
+  border: 1px solid var(--border-color);
+  overflow-x: auto;
+  width: 100%;
+  margin-bottom: 30px; /* زيادة الهامش بين الجداول */
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+}
+
+th,
+td {
+  padding: 15px;
+  text-align: center;
+  border-bottom: 1px solid var(--border-color);
+}
+
+th {
+  background: rgba(0, 0, 0, 0.02);
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.status-label {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.on_shelf {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.moving {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.row-delete-btn {
+  color: var(--danger-color);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+
+.is-logged-in #loginOverlay {
+    display: none !important;
+}
+
+.is-logged-in #mainContainer {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* --- Responsive Media Queries --- */
+@media (max-width: 850px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  body {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-content {
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .btn-group {
+    flex-direction: column;
+  }
+}

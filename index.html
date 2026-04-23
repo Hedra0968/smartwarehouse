@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      // فحص الثيم فوراً قبل أي عملية رسم
+      if (localStorage.getItem("sm_theme") === "dark") {
+        document.documentElement.classList.add("dark-mode");
+      }
+    </script>
+    <title>Smart Warehouse Management</title>
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  
+  <div id="app-loader" style="position:fixed; inset:0; background:var(--bg-color); z-index:10000; transition: opacity 0.2s;"></div>
+
+  <script>
+    // فحص الثيم فوراً لتلوين الـ loader
+    const savedTheme = localStorage.getItem("sm_theme");
+    if (savedTheme === "dark") {
+        document.documentElement.classList.add("dark-mode");
+        document.getElementById('app-loader').style.backgroundColor = "#1a1a2e";
+    }
+  </script>
+
+  <body class="light-mode">
+    
+    <div id="loginOverlay" class="login-overlay">
+      <div class="login-card">
+        <div class="theme-toggle-login">
+           <button id="loginThemeToggle" class="theme-switch small">
+             <i class="fas fa-moon"></i>
+           </button>
+        </div>
+        <h2>Sign In</h2>
+        <div class="login-form">
+          <div class="input-wrapper">
+            <i class="fas fa-user"></i>
+            <input type="text" id="username" placeholder="Username" />
+          </div>
+          <div class="input-wrapper">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="password" placeholder="Password" />
+            <i class="fas fa-eye toggle-password" id="togglePassword"></i>
+          </div>
+          <button onclick="checkLogin()" class="btn btn-primary login-btn">
+             Login
+          </button>
+          <p id="loginError" class="error-msg">Invalid Credentials</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="container" id="mainContainer" style="display: none;">
+      <div class="content-limiter">
+        <header>
+          <div class="header-content">
+            <h1><i class="fas fa-boxes-stacked"></i> Smart Dashboard</h1>
+            <div class="header-btns">
+              <button id="themeToggle" class="theme-switch">
+                <i class="fas fa-moon"></i>
+              </button>
+              <button onclick="logout()" class="btn btn-logout">
+                <i class="fas fa-sign-out-alt"></i>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <div class="dashboard-grid">
+          <div class="card">
+            <h3><i class="fas fa-plus-circle"></i> Add Product (New Row)</h3>
+            <div class="form-group">
+              <input type="text" id="newName" placeholder="Product Name" />
+              <input type="text" id="newRfid" placeholder="RFID Tag (Primary Key)" />
+              <input type="text" id="newCategory" placeholder="Category (e.g. Electronics)" />
+              <select id="newStatus">
+                <option value="on_shelf">On Shelf</option>
+                <option value="moving">Moving</option>
+              </select>
+              
+              <div id="dynamicInputs" class="form-group"></div>
+
+              <button onclick="addProduct()" class="btn btn-success">
+                <i class="fas fa-save"></i> Save to Table
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3><i class="fas fa-columns"></i> Column Management</h3>
+            <div class="form-group">
+              <input
+                type="text"
+                id="colInput"
+                placeholder="Type column name here..."
+              />
+              <div class="btn-group">
+                <button onclick="handleColumn('add')" class="btn btn-primary">
+                  <i class="fas fa-plus"></i> Add Column
+                </button>
+                <button onclick="handleColumn('delete')" class="btn btn-danger">
+                  <i class="fas fa-trash-alt"></i> Delete by Name
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="search-section">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search in Products or Logs..."
+              onkeyup="filterTable()"
+            />
+          </div>
+        </div>
+
+        <h3 class="table-title"><i class="fas fa-list"></i> Products Inventory</h3>
+        <div class="table-wrapper">
+          <table id="mainTable">
+            <thead id="tableHead"></thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+
+        <h3 class="table-title"><i class="fas fa-history"></i> System Logs (Arrival Timestamps)</h3>
+        <div class="table-wrapper">
+          <table id="logsTable">
+            <thead>
+              <tr>
+                <th>Log ID</th>
+                <th>RFID Tag</th>
+                <th>Arrival Timestamp</th>
+              </tr>
+            </thead>
+            <tbody id="logsBody">
+              </tbody>
+          </table>
+        </div>
+      </div> 
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+      if (localStorage.getItem("sm_isLoggedIn") === "true") {
+        document.documentElement.classList.add("is-logged-in");
+      }
+    </script>
+  </body>
+</html>
