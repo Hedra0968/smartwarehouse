@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// --- دالة تنسيق الوقت الاحترافية (إجبار التنسيق الرقمي) ---
+// --- دالة تنسيق الوقت الاحترافية (إجبار التنسيق الرقمي الثابت) ---
 function getFormattedDate() {
     const now = new Date();
     const year = now.getFullYear();
@@ -106,9 +106,10 @@ function renderTable() {
     const row = document.createElement("tr");
 
     if (isEditing) {
+      // تم فتح تعديل الـ RFID هنا عبر إضافة Input له
       row.innerHTML = `
         <td><input type="text" id="editName" value="${p.name}"></td>
-        <td><strong>${p.rfid}</strong></td>
+        <td><input type="text" id="editRfid" value="${p.rfid}"></td>
         <td><input type="text" id="editCategory" value="${p.category}"></td>
         <td>
           <select id="editStatus">
@@ -139,8 +140,12 @@ function renderTable() {
   logsBody.innerHTML = "";
   inventoryLogs.forEach(log => {
     const row = document.createElement("tr");
-    // التعديل هنا: إضافة dir="ltr" لإجبار التنسيق من اليسار لليمين وتجنب انعكاس العربي
-    row.innerHTML = `<td>${log.log_id}</td><td>${log.rfid_tag}</td><td dir="ltr" style="text-align: center;">${log.arrival_timestamp}</td>`;
+    // إجبار التنسيق LTR لضمان عدم انعكاس الأرقام في المتصفحات العربية
+    row.innerHTML = `
+      <td>${log.log_id}</td>
+      <td>${log.rfid_tag}</td>
+      <td dir="ltr" style="text-align: center; font-family: monospace;">${log.arrival_timestamp}</td>
+    `;
     logsBody.appendChild(row);
   });
 
@@ -159,12 +164,30 @@ function cancelEdit() {
   renderTable();
 }
 
-function saveEdit(rfid) {
-  const product = products.find(p => p.rfid === rfid);
-  if (product) {
-    product.name = document.getElementById("editName").value;
-    product.category = document.getElementById("editCategory").value;
-    product.status = document.getElementById("editStatus").value;
+function saveEdit(oldRfid) {
+  const newRfid = document.getElementById("editRfid").value;
+  const productIndex = products.findIndex(p => p.rfid === oldRfid);
+  
+  if (productIndex !== -1) {
+    // تحديث البيانات
+    products[productIndex].name = document.getElementById("editName").value;
+    products[productIndex].category = document.getElementById("editCategory").value;
+    products[productIndex].status = document.getElementById("editStatus").value;
+    
+    // إذا تغير الـ RFID، نقوم بتحديثه في جدول المنتجات وفي السجلات المرتبطة به
+    if (newRfid !== oldRfid) {
+        // تأكد أن الـ RFID الجديد غير موجود مسبقاً
+        if (products.find(p => p.rfid === newRfid)) {
+            alert("This RFID already exists!");
+            return;
+        }
+        products[productIndex].rfid = newRfid;
+        
+        // تحديث الـ Logs المرتبطة
+        inventoryLogs.forEach(log => {
+            if (log.rfid_tag === oldRfid) log.rfid_tag = newRfid;
+        });
+    }
   }
   editingRfid = null;
   renderTable();
@@ -228,3 +251,4 @@ window.onload = function() {
     if(loader) { loader.style.opacity = '0'; setTimeout(() => loader.remove(), 200); }
   }, 50);
 };
+  
