@@ -21,7 +21,6 @@
   <div id="app-loader" style="position:fixed; inset:0; background:var(--bg-color); z-index:10000; transition: opacity 0.2s;"></div>
 
   <script>
-    // فحص الثيم فوراً لتلوين الـ loader
     const savedTheme = localStorage.getItem("sm_theme");
     if (savedTheme === "dark") {
         document.documentElement.classList.add("dark-mode");
@@ -73,45 +72,27 @@
           </div>
         </header>
 
-        <div class="dashboard-grid">
-          <div class="card">
-            <h3><i class="fas fa-plus-circle"></i> Add Product (New Row)</h3>
+        <div class="dashboard-grid" style="grid-template-columns: 1fr;"> <div class="card">
+            <h3><i class="fas fa-plus-circle"></i> Add New Product</h3>
             <div class="form-group">
-              <input type="text" id="newName" placeholder="Product Name" />
-              <input type="text" id="newRfid" placeholder="RFID Tag (Primary Key)" />
-              <input type="text" id="newCategory" placeholder="Category (e.g. Electronics)" />
-              <select id="newStatus">
-                <option value="on_shelf">On Shelf</option>
-                <option value="moving">Moving</option>
-              </select>
-              
-              <div id="dynamicInputs" class="form-group"></div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <input type="text" id="newName" placeholder="Product Name" />
+                <input type="text" id="newRfid" placeholder="RFID Tag (Primary Key)" />
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px;">
+                <input type="text" id="newCategory" placeholder="Category (e.g. Electronics)" />
+                <select id="newStatus">
+                  <option value="on_shelf">On Shelf</option>
+                  <option value="moving">Moving</option>
+                </select>
+              </div>
 
-              <button onclick="addProduct()" class="btn btn-success">
-                <i class="fas fa-save"></i> Save to Table
+              <button onclick="addProduct()" class="btn btn-success" style="margin-top: 10px;">
+                <i class="fas fa-save"></i> Save to Database
               </button>
             </div>
           </div>
-
-          <div class="card">
-            <h3><i class="fas fa-columns"></i> Column Management</h3>
-            <div class="form-group">
-              <input
-                type="text"
-                id="colInput"
-                placeholder="Type column name here..."
-              />
-              <div class="btn-group">
-                <button onclick="handleColumn('add')" class="btn btn-primary">
-                  <i class="fas fa-plus"></i> Add Column
-                </button>
-                <button onclick="handleColumn('delete')" class="btn btn-danger">
-                  <i class="fas fa-trash-alt"></i> Delete by Name
-                </button>
-              </div>
-            </div>
           </div>
-        </div>
 
         <div class="search-section">
           <div class="search-box">
@@ -128,7 +109,8 @@
         <h3 class="table-title"><i class="fas fa-list"></i> Products Inventory</h3>
         <div class="table-wrapper">
           <table id="mainTable">
-            <thead id="tableHead"></thead>
+            <thead id="tableHead">
+                </thead>
             <tbody id="tableBody"></tbody>
           </table>
         </div>
@@ -143,8 +125,7 @@
                 <th>Arrival Timestamp</th>
               </tr>
             </thead>
-            <tbody id="logsBody">
-              </tbody>
+            <tbody id="logsBody"></tbody>
           </table>
         </div>
       </div> 
